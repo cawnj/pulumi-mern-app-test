@@ -29,3 +29,70 @@ const frontend = new docker.RemoteImage(`${frontendImageName}Image`, {
 const mongoImage = new docker.RemoteImage("mongoImage", {
     name: "pulumi/tutorial-pulumi-fundamentals-database-local:latest",
 });
+
+// Create network
+const network = new docker.Network("network", {
+    name: `services-${stack}`,
+});
+
+// Create mongo container
+const mongoContainer = new docker.Container("mongoContainer", {
+    name: `mongo-${stack}`,
+    image: mongoImage.repoDigest,
+    ports: [
+        {
+            internal: mongoPort,
+            external: mongoPort,
+        },
+    ],
+    networksAdvanced: [
+        {
+            name: network.name,
+            aliases: ["mongo"],
+        },
+    ],
+})
+
+// Create backend container
+const backendContainer = new docker.Container("backendContainer", {
+    name: `backend-${stack}`,
+    image: backend.repoDigest,
+    ports: [
+        {
+            internal: backendPort,
+            external: backendPort,
+        },
+    ],
+    envs: [
+        `DATABASE_HOST=${mongoHost}`,
+        `DATABASE_NAME=${database}`,
+        `NODE_ENV=${nodeEnvironment}`,
+    ],
+    networksAdvanced: [
+        {
+            name: network.name,
+        },
+    ],
+}, { dependsOn: [ mongoContainer ] });
+
+// Create frontend container
+const frontendContainer = new docker.Container("frontendContainer", {
+    name: `frontend-${stack}`,
+    image: frontend.repoDigest,
+    ports: [
+        {
+            internal: frontendPort,
+            external: frontendPort,
+        },
+    ],
+    envs: [
+            `PORT=${frontendPort}`,
+            `HTTP_PROXY=backend-${stack}:${backendPort}`,
+            `PROXY_PROTOCOL=${protocol}`,
+    ],
+    networksAdvanced: [
+        {
+            name: network.name,
+        },
+    ],
+})
