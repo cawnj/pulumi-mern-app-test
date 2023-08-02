@@ -1,4 +1,8 @@
 config:
   pulumi-mern-app:backendPort: "3000"
+  pulumi-mern-app:database: cart
   pulumi-mern-app:frontendPort: "3001"
+  pulumi-mern-app:mongoHost: mongodb://mongo:27017
   pulumi-mern-app:mongoPort: "27017"
+  pulumi-mern-app:nodeEnvironment: development
+  pulumi-mern-app:protocol: http://
