@@ -1,0 +1,4 @@
+config:
+  pulumi-mern-app:backendPort: "3000"
+  pulumi-mern-app:frontendPort: "3001"
+  pulumi-mern-app:mongoPort: "27017"
